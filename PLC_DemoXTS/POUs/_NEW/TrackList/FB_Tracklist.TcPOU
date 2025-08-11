@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <POU Name="FB_Tracklist" Id="{546a42d1-a9e5-46d3-b826-00988018d01d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Tracklist IMPLEMENTS ITrackList
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	_list : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
+	_sorted : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
+	_temp : ST_MoverData;
+	i,j : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="AddMover" Id="{19bcc54b-d09d-4767-9281-dabe045635c5}">
+      <Declaration><![CDATA[METHOD AddMover : BOOL
+VAR_INPUT
+	data	: ST_MoverData;
+END_VAR
+VAR
+	temp	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_list[data.id] := data;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Sort" Id="{5182b790-329f-48c5-abac-59d6da2e6290}">
+      <Declaration><![CDATA[METHOD Sort : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Step 1: Copy the list
+_sorted := _list;
+
+// Step 2: Bubble Sort the list
+FOR i := 1 TO iMaxNumbMovers - 1 DO
+    FOR j := i + 1 TO iMaxNumbMovers DO
+        IF _sorted[i].pos > _sorted[j].pos THEN
+            _temp := _sorted[i];
+            _sorted[i] := _sorted[j];
+            _sorted[j] := _temp;
+        END_IF
+    END_FOR
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

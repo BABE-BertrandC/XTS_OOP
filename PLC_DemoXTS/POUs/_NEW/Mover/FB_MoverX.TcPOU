@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <POU Name="FB_MoverX" Id="{5a7cf214-71b7-4c8d-a77d-204028ecb287}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MoverX IMPLEMENTS IMover
+VAR
+	_id       : UDINT;
+	_axisRef  : REFERENCE TO AXIS_REF;
+	_position : LREAL;
+	_velocity : LREAL;
+	_status	: INT;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="AssignAxisRef" Id="{e1d82af4-8f6a-4c7f-9d48-719d7962cec7}">
+      <Declaration><![CDATA[METHOD AssignAxisRef : BOOL
+VAR_INPUT
+	axis	: REFERENCE TO AXIS_REF;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_axisRef REF= axis;
+AssignAxisRef := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AssignID" Id="{aefc784f-4d23-4fb9-8518-4b089e31af57}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD AssignID : BOOL
+VAR_INPUT
+	ID	: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_id := ID;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetPosition" Id="{1be03cfb-a6c3-4443-9902-40f951285a9f}">
+      <Declaration><![CDATA[METHOD GetPosition : LREAL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GetPosition := _position;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetStatus" Id="{b297532d-4480-4f71-9b83-39026a310b3a}">
+      <Declaration><![CDATA[METHOD GetStatus : INT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GetStatus := _status;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetStatus" Id="{0a7191fb-5e77-4dea-a05d-a0bdca83c510}">
+      <Declaration><![CDATA[METHOD SetStatus : BOOL
+VAR_INPUT
+	status	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_status := status;
+SetStatus := true;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UpdateData" Id="{7fc6b7f0-a1ce-46fa-a182-acb29a577add}">
+      <Declaration><![CDATA[METHOD UpdateData : ST_MoverData
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_position := _axisRef.NcToPlc.ModuloActPos;
+UpdateData.id := _id;
+UpdateData.pos := _position;
+UpdateData.status := _status;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UpdatePosition" Id="{ab62045e-375f-46d3-b7af-e566298d2bb8}">
+      <Declaration><![CDATA[METHOD UpdatePosition : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_position := _axisRef.NcToPlc.ModuloActPos;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <Itf Name="ITrackList" Id="{26cab804-596d-4864-8cd8-7d64b3c06639}">
+    <Declaration><![CDATA[INTERFACE ITrackList
+]]></Declaration>
+    <Method Name="AddMover" Id="{2b01b911-4a74-4eee-a901-630b73283a40}">
+      <Declaration><![CDATA[METHOD AddMover : bool
+VAR_INPUT
+	data	: ST_MoverData;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Sort" Id="{11abf748-dd65-48d2-bc1f-2500f31ada4d}">
+      <Declaration><![CDATA[METHOD Sort : bool
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="FB_VirtualMaster" Id="{9baefa1e-90d0-4831-93ac-d31d6ea1053c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_VirtualMaster
+VAR_INPUT
+	bActivateCam	: BOOL;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR_IN_OUT
+	Master			: Axis_Ref;
+	Slave			: Axis_Ref;
+END_VAR
+VAR
+	fbCamIn			: MC_CamIn;
+	Options			: ST_CamInOptions;
+	fbCamOut		: MC_CamOut;
+	fbStop			: MC_Halt;
+	fbSetPos		: MC_SetPosition;
+	MasterOffset	: LREAL;;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Options.ActivationMode := MC_CamActivationMode.MC_CAMACTIVATION_ATMASTERAXISPOS;
+Options.ActivationPosition := (Master.NcToPlc.ModuloActTurns+1)*360;
+CASE (Master.NcToPlc.ModuloActTurns MOD 3) OF
+0:	MasterOffset:=720;
+1:	MasterOffset:=360;
+2:	MasterOffset:=0;
+END_CASE
+
+
+fbCamIn(
+	Master			:= Master, 
+	Slave			:= Slave, 
+	Execute			:= bActivateCam, 
+	StartMode		:= MC_StartMode.MC_STARTMODE_MASTERABS_SLAVEREL,
+	MasterOffset	:= MasterOffset,
+	CamTableID		:= 1, 
+	Options			:= Options, 
+	);
+
+fbCamOut.Execute	:= FALSE;
+fbStop.Execute 		:= FALSE;
+fbSetPos.Execute 	:= FALSE;
+IF Slave.NcToPlc.ActPos>750 THEN
+	fbCamOut.Execute := TRUE;
+	IF fbCamOut.Done THEN fbStop.Execute := TRUE; END_IF
+	IF fbStop.Done THEN fbSetPos.Execute := TRUE; END_IF
+END_IF
+
+fbCamOut	(Slave	:= Slave);	
+fbStop		(Axis	:= Slave);
+fbSetPos	(Axis	:= Slave);
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_MoverCheckPos" Id="{5c96e9a7-71f0-49e2-b819-260834f0d830}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MoverCheckPos
+VAR_INPUT
+	rActualPosition	: LREAL;
+	rCheckPosition	: LREAL;
+	rRailLength		: LREAL;
+END_VAR
+VAR_OUTPUT
+	bInPosition		: BOOL;
+END_VAR
+VAR
+	rTolerance		: LREAL	:= 1;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bInPosition:=FALSE;
+IF rCheckPosition<=rTolerance THEN
+	IF rActualPosition>(rRailLength+rCheckPosition-rTolerance) OR rActualPosition<(rCheckPosition+rTolerance) THEN
+		bInPosition:=TRUE;
+	END_IF
+END_IF
+
+IF rCheckPosition>rTolerance AND rCheckPosition<(rRailLength-rTolerance) THEN
+	IF rActualPosition>(rCheckPosition-rTolerance) AND rActualPosition<(rCheckPosition+rTolerance)THEN
+		bInPosition:=TRUE;
+	END_IF
+END_IF
+
+IF rCheckPosition>=(rRailLength-rTolerance) THEN
+	IF rActualPosition>(rCheckPosition-rTolerance) OR rActualPosition<(rCheckPosition+rTolerance-rRailLength)THEN
+		bInPosition:=TRUE;
+	END_IF
+END_IF
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

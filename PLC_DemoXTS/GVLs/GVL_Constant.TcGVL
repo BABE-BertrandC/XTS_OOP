@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_Constant" Id="{0c0a16d8-c818-4096-8edc-bfd15e2b80cc}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+	iMaxNumbMovers		: INT := 35;
+	iMaxNumbVirtMasters	: INT := 5;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

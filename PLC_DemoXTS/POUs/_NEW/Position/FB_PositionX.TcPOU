@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <POU Name="FB_PositionX" Id="{f9da956f-0a89-4671-827d-6c04f2d33aac}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PositionX IMPLEMENTS IPosition
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	_position	: LREAL;
+	_linked		: UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Available" Id="{8b398280-858b-4913-9249-673e7096f588}">
+      <Declaration><![CDATA[METHOD Available : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _linked = 0 THEN
+	Available := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetMover" Id="{83289a63-eb24-4eac-83c4-eebaa2247582}">
+      <Declaration><![CDATA[METHOD SetMover : BOOL
+VAR_INPUT
+	moverNumber	: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _linked = 0 AND moverNumber <> 0 THEN
+	_linked := moverNumber;
+	SetMover := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetPosition" Id="{66d03994-61db-4326-a0b5-789123102fd6}">
+      <Declaration><![CDATA[METHOD SetPosition
+VAR_INPUT
+	position	: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_position := position;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

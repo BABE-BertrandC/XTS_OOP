@@ -1,0 +1,378 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <POU Name="FB_XTS" Id="{f9db60e6-f697-4c75-97c9-47a4a6fecb83}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_XTS
+
+VAR_INPUT
+	bEnable_XTS				: BOOL;
+END_VAR
+
+VAR_IN_OUT
+	Mover					: ARRAY [*] OF AXIS_REF;
+	CAGroup					: AXES_GROUP_REF;
+END_VAR
+
+VAR_OUTPUT
+	// Status bits	
+	bAllMoversFound			: BOOL;
+	bAllMoversEnabled		: BOOL;
+	bMoverHasError			: BOOL;
+	bCAGroupMoving			: BOOL;
+	bCAGroupError			: BOOL;
+	bCAGroupNotReady		: BOOL;
+	bCAGroupStandby			: BOOL;
+	bCAGroupStopping		: BOOL;
+	bCAGroupDisabled		: BOOL;
+END_VAR
+
+VAR
+	i						: DINT;
+	step					: INT;
+	pMover					: POINTER TO AXIS_REF;
+
+	// Command bits
+	bResetAll				: BOOL;
+	bEnableAllMovers		: BOOL;
+	bEnableCAGroup			: BOOL;
+	bDisableCAGroup			: BOOL;
+	bResetMovers			: BOOL;
+	bResetCAGroup			: BOOL;
+	bConfig_CAGroup			: BOOL;
+	bReConfig_CAGroup		: BOOL;
+
+	// Status bits	
+	bRunXTS					: BOOL;
+	bConfig_CAGroupDone		: BOOL;
+	bConfig_CAGroupErr		: BOOL;
+	bReConfig_CAGroupDone	: BOOL;
+	bReConfig_CAGroupErr	: BOOL;
+
+	// Function Blocks
+	fbPowerMover			: ARRAY [1..iMaxNumbMovers] OF MC_Power;
+	fbResetMover			: ARRAY [1..iMaxNumbMovers] OF MC_Reset;
+	fbAddAxisTo_CAGroup		: ARRAY [1..iMaxNumbMovers] OF MC_AddAxisToGroup;
+	fbRemoveFrom_CAGroup	: ARRAY [1..iMaxNumbMovers] OF MC_RemoveAxisFromGroup;
+	fbEnableCAGroup			: MC_GroupEnable;
+	fbDisableCAGroup		: MC_GroupDisable;
+	fbResetCAGroup			: MC_GroupReset;
+	fbCAGroupReadStatus		: MC_GroupReadStatus;
+	fbTimer					: TON;
+	fbRTrgReset				: R_TRIG;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+// **************************************************************************************
+// Wait until XTS is started
+// **************************************************************************************
+
+IF NOT bRunXTS THEN
+	bAllMoversFound := TRUE;
+	FOR i:=1 TO UPPER_BOUND(Mover,1) DO
+		bAllMoversFound := bAllMoversFound AND Mover[i].NcToPlc.ActPos<>0;
+	END_FOR
+	bRunXTS := bAllMoversFound;
+END_IF
+
+IF NOT bRunXTS THEN
+	RETURN;
+END_IF
+
+
+// **************************************************************************************
+// Init XTS with Collision Avoidance
+// **************************************************************************************
+
+CASE step OF
+	
+0:		// Wait for Enable-XTS command
+		bResetCAGroup 			:= fbRTrgReset.Q;
+		bResetMovers			:= fbRTrgReset.Q;	 
+		bEnableCAGroup			:= FALSE;
+		bDisableCAGroup			:= FALSE;
+		bConfig_CAGroupDone		:= FALSE;
+		bConfig_CAGroupErr		:= FALSE;
+		bReConfig_CAGroupDone	:= FALSE;
+		bReConfig_CAGroupErr	:= FALSE;
+		IF bEnable_XTS THEN
+			Step:=10;	
+		END_IF
+	
+10:		//Add Axis to Group
+		bConfig_CAGroup:=TRUE;
+		IF bConfig_CAGroupDone THEN
+			Step:=20;
+			bConfig_CAGroup:=FALSE;
+		END_IF
+		IF bConfig_CAGroupErr THEN
+			Step:=999;
+			bConfig_CAGroup:=FALSE;
+		END_IF
+		
+20:		//Enable CA-Group
+		bEnableCAGroup:=TRUE;
+		IF fbEnableCAGroup.Done THEN
+			Step:=30;
+			bEnableCAGroup:=FALSE;
+		END_IF
+		IF fbEnableCAGroup.Error THEN
+			Step:=999;
+			bEnableCAGroup:=FALSE;
+		END_IF	
+		
+30:		// Power Movers
+		bEnableAllMovers := TRUE;
+		fbTimer(IN:=TRUE,PT:=T#200MS);
+		IF fbTimer.Q THEN
+			Step:=40;
+			fbTimer(IN:=FALSE);
+		END_IF
+			
+40:		// Reset Movers
+		bResetMovers := TRUE;
+		fbTimer(IN:=TRUE,PT:=T#2000MS);
+		IF bAllMoversEnabled THEN
+			Step:=50;
+			bResetMovers := FALSE;
+			fbTimer(IN:=FALSE);
+		END_IF
+		IF fbTimer.Q THEN 
+			Step:=999;
+			bResetMovers := FALSE;
+			fbTimer(IN:=FALSE);
+		END_IF
+	
+50:		// Reset CA-Group
+		bResetCAGroup := TRUE;
+		IF fbResetCAGroup.Done THEN
+			Step:=100;
+			bResetCAGroup := FALSE;
+		END_IF
+		IF fbResetCAGroup.Error THEN
+			Step:=999;
+			bResetCAGroup := FALSE;
+		END_IF	
+	
+100:	// XTS CA-Group Ready
+		bResetCAGroup 	:= fbRTrgReset.Q;
+		bResetMovers	:= fbRTrgReset.Q;	 
+		IF NOT bEnable_XTS THEN
+			Step:=110;
+		END_IF
+
+110:	// Disable Movers
+		bEnableAllMovers := FALSE;
+		fbTimer(IN:=TRUE,PT:=T#200MS);
+		IF fbTimer.Q THEN
+			Step:=120;
+			fbTimer(IN:=FALSE);
+		END_IF
+	
+120:	// Disable CA-Group		
+		bDisableCAGroup:=TRUE;
+		IF fbDisableCAGroup.Done THEN
+			Step:=130;
+			bDisableCAGroup:=FALSE;
+			bEnableAllMovers:=FALSE;
+		END_IF
+		IF fbDisableCAGroup.Error THEN
+			Step:=999;
+			bDisableCAGroup:=FALSE;
+		END_IF		
+
+130:	// Reconfig CA-Group
+		bReConfig_CAGroup:=TRUE;
+		IF bReConfig_CAGroupDone THEN
+			Step:=140;
+			bReConfig_CAGroup:=FALSE;
+		END_IF
+		IF bReConfig_CAGroupErr THEN
+			Step:=999;
+			bReConfig_CAGroup:=FALSE;
+		END_IF
+		M_Config_CAGroup();
+		
+140:	// Reset Movers
+		bResetMovers := TRUE;
+		fbTimer(IN:=TRUE,PT:=T#2000MS);
+		IF NOT bMoverHasError THEN
+			Step:=150;
+			bResetMovers := FALSE;
+			fbTimer(IN:=FALSE);
+		END_IF
+		IF fbTimer.Q THEN 
+			Step:=999;
+			bResetMovers := FALSE;
+			fbTimer(IN:=FALSE);
+		END_IF
+
+150:	// Reset CA-Group
+		bResetCAGroup := TRUE;
+		IF fbResetCAGroup.Done THEN
+			Step:=0;
+			bResetCAGroup := FALSE;
+		END_IF
+		IF fbResetCAGroup.Error THEN
+			Step:=999;
+			bResetCAGroup := FALSE;
+		END_IF	
+
+999:	// Error
+		bEnable_XTS			:=FALSE;
+		bEnableAllMovers	:=FALSE;
+		bResetCAGroup 		:= fbRTrgReset.Q;
+		bResetMovers		:= fbRTrgReset.Q;	 
+		IF fbRTrgReset.Q THEN
+			Step:=0;
+		END_IF
+
+END_CASE
+
+M_Config_CAGroup();
+M_ReadStatus();
+M_Enable_Movers();
+M_Enable_CAGroup();
+M_Reset();	
+
+fbRTrgReset(CLK:=bResetAll);
+]]></ST>
+    </Implementation>
+    <Method Name="M_Config_CAGroup" Id="{451b8b65-3a4d-48b6-8e9b-d9d3b843ddba}">
+      <Declaration><![CDATA[METHOD M_Config_CAGroup 	: BOOL
+VAR
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Add Axis to Group
+FOR i := 1 TO UPPER_BOUND(Mover,1) DO
+	bConfig_CAGroupDone	:= TRUE;
+	fbAddAxisTo_CAGroup[i](
+		AxesGroup		:= CAGroup, 
+		Axis			:= Mover[i], 
+		Execute			:= bConfig_CAGroup, 
+		IdentInGroup	:= UDINT_TO_IDENTINGROUP(i), 
+		);		
+	bConfig_CAGroupDone	:= bConfig_CAGroupDone AND fbAddAxisTo_CAGroup[i].Done;
+	bConfig_CAGroupErr	:= bConfig_CAGroupErr OR fbAddAxisTo_CAGroup[i].Error;
+END_FOR
+
+// Remove Axis from Group
+FOR i := 1 TO UPPER_BOUND(Mover,1) DO
+	bReConfig_CAGroupDone	:= TRUE;
+	fbRemoveFrom_CAGroup[i](
+		AxesGroup			:= CAGroup, 
+		Execute				:= bReConfig_CAGroup, 
+		IdentInGroup		:= UDINT_TO_IDENTINGROUP(i), 
+		);
+	bReConfig_CAGroupDone	:= bReConfig_CAGroupDone AND fbRemoveFrom_CAGroup[i].Done;
+	bReConfig_CAGroupErr	:= bReConfig_CAGroupErr OR fbRemoveFrom_CAGroup[i].Error;
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Enable_CAGroup" Id="{5727f421-672a-4be2-8c6a-0b46b96010a6}">
+      <Declaration><![CDATA[METHOD M_Enable_CAGroup : BOOL
+VAR_INPUT
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Enable CA-Group
+fbEnableCAGroup(
+	AxesGroup	:= CAGroup, 
+	Execute		:= bEnableCAGroup, 
+	);	
+
+	
+// Disable CA-Group	
+fbDisableCAGroup(
+	AxesGroup	:= CAGroup, 
+	Execute		:= bDisableCAGroup, 
+	);	
+	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Enable_Movers" Id="{515af1d9-2fd2-441f-bae3-ec4b47f20bd4}">
+      <Declaration><![CDATA[METHOD M_Enable_Movers : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Enable Movers
+FOR i:=1 TO UPPER_BOUND(Mover,1) DO
+	fbPowerMover[i](
+		Axis			:= Mover[i], 
+		Enable			:= bEnableAllMovers, 
+		Enable_Positive	:= bEnableAllMovers, 
+		Enable_Negative	:= bEnableAllMovers, 
+		Override		:= 100, 
+		);
+END_FOR
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_ReadStatus" Id="{c521a79c-07e3-4455-aa92-7935b6ffe34f}">
+      <Declaration><![CDATA[METHOD M_ReadStatus : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// All Movers Enabled
+bAllMoversEnabled := TRUE;
+FOR i:=1 TO UPPER_BOUND(Mover,1) DO
+	bAllMoversEnabled := bAllMoversEnabled AND Mover[i].Status.ControlLoopClosed;
+END_FOR
+
+// Mover has Error
+bMoverHasError := FALSE;
+FOR i:=1 TO UPPER_BOUND(Mover,1) DO
+	bMoverHasError := bMoverHasError OR Mover[i].Status.Error;
+END_FOR
+
+// Read Status NC
+FOR i:=1 TO UPPER_BOUND(Mover,1) DO
+	Mover[i].ReadStatus();
+END_FOR
+
+// Read Status CA-Group
+fbCAGroupReadStatus(
+	AxesGroup		:= CAGroup, 
+	Enable			:= NOT fbCAGroupReadStatus.Busy, 
+	GroupMoving		=> bCAGroupMoving, 
+	GroupErrorStop	=> bCAGroupError, 
+	GroupNotReady	=> bCAGroupNotReady, 
+	GroupStandby	=> bCAGroupStandby, 
+	GroupStopping	=> bCAGroupStopping, 
+	GroupDisabled	=> bCAGroupDisabled, 
+	);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="M_Reset" Id="{192a7134-b0a8-4d8a-a831-e798bce4abf3}">
+      <Declaration><![CDATA[METHOD M_Reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Reset Movers
+FOR i:=1 TO UPPER_BOUND(Mover,1) DO
+	fbResetMover[i](
+		Axis	:= Mover[i], 
+		Execute	:= bResetMovers (*AND Mover[i].Status.Error*) 
+		);
+END_FOR
+
+// Reset CA-Group
+fbResetCAGroup(
+	AxesGroup	:= CAGroup, 
+	Execute		:= bResetCAGroup, 
+	);
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

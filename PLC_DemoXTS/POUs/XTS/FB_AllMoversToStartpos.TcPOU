@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_AllMoversToStartpos" Id="{6142d546-14f9-4e5d-adf3-1fbc5d04708e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AllMoversToStartpos
+VAR_INPUT
+	bXTS_MoveToStartPos		: BOOL;
+	rInitPosition			: LREAL;
+	rInitVelocity			: LREAL;
+	rRailLength				: LREAL;
+	rGap					: LREAL;
+END_VAR
+
+VAR_IN_OUT
+	Mover					: ARRAY [*] OF AXIS_REF;
+END_VAR
+
+VAR
+	i						: DINT;
+	fbMoveToStartPos		: ARRAY [1..iMaxNumbMovers] OF MC_MoveRelativeCA;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// **************************************************************************************
+// Move all Movers to initial position
+// **************************************************************************************
+
+FOR i:=1 TO UPPER_BOUND(Mover,1) DO
+	
+	IF Mover[i].NcToPlc.ModuloSetPos < (rInitPosition - 1) THEN
+		fbMoveToStartPos[i].Distance := rInitPosition - Mover[i].NcToPlc.ModuloSetPos;
+	ELSE;
+		fbMoveToStartPos[i].Distance := rInitPosition - Mover[i].NcToPlc.ModuloSetPos + rRailLength ;
+	END_IF
+		
+	fbMoveToStartPos[i](
+		Axis			:= Mover[i], 
+		Execute			:= bXTS_MoveToStartPos, 
+		ContinuousUpdate:= TRUE, 
+		Velocity		:= rInitVelocity, 
+		Gap				:= rGap, 
+		);
+
+END_FOR
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_AllMoversToStartpos">
+      <LineId Id="31" Count="2" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="35" Count="14" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

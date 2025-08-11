@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <POU Name="MAIN" Id="{fc150750-4397-43d8-a828-daaa89e3e04f}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+
+	bEnable_XTS1			: BOOL;
+	bMoveToStartPos_XTS1	: BOOL;
+	bEnable_Master			: BOOL;
+	bMoveMaster				: BOOL;
+	bSensor_Product			: BOOL;
+
+	fbInfeed1				: FB_Infeed;
+	fbXTS1					: FB_XTS;
+	fbMoveToStartPos_XTS1	: FB_AllMoversToStartpos;
+	
+	// Cycle
+	i,j						: INT;
+	bStartSyncMaster		: BOOL;
+	bStartSyncMover			: BOOL;
+	Trg_bStartSyncMaster	: R_Trig;
+	iMoverAtStartpos_XTS1	: INT;
+	iVirtMasterAtStartpos	: INT;
+	fbMoveratStartPos_XTS1	: ARRAY [1..GVL_XTS1.iNumbOfMovers] OF FB_MoverCheckPos;
+	fbMoveratRobot1Pos		: ARRAY [1..GVL_XTS1.iNumbOfMovers] OF FB_MoverCheckPos;
+	fbMoveratRobot2Pos		: ARRAY [1..GVL_XTS1.iNumbOfMovers] OF FB_MoverCheckPos;
+	fbMoverCycle_XTS1		: ARRAY [1..GVL_XTS1.iNumbOfMovers] OF FB_MoverCycle;
+	
+	// Robot1 and Robot2
+	MoverAtRobot1			: ARRAY [1..10] OF INT;
+	MoverAtRobot2			: ARRAY [1..10] OF INT;
+	bRobot1_Filled			: BOOL;
+	bRobot2_Filled			: BOOL;
+	fbRobot1_Timer			: TON;
+	fbRobot2_Timer			: TON;
+	
+	MyXTS	: XTS_MAIN;
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Prg_Camming();
+
+// Infeed
+fbInfeed1(
+	bEnable_Master		:= bEnable_Master, 
+	bMoveMaster			:= bMoveMaster, 
+	bSensorProduct		:= bSensor_Product,
+	Master				:= GVL_Infeed.MasterAxis, 
+	VirtMaster			:= GVL_Infeed.VirtalMaster,
+	);
+
+
+// XTS 1 : Enable all movers with Collision Avoindance
+fbXTS1(
+	bEnable_XTS		:= bEnable_XTS1, 
+	Mover			:= GVL_XTS1.Mover, 
+	CAGroup			:= GVL_XTS1.CAGroup, 
+	);
+	
+	
+// XTS 1 : Move all movers to Startposition 
+fbMoveToStartPos_XTS1(
+	bXTS_MoveToStartPos	:= bMoveToStartPos_XTS1, 
+	rInitPosition		:= GVL_XTS1.rInitPosition, 
+	rInitVelocity		:= GVL_XTS1.rInitVelocity, 
+	rRailLength			:= GVL_XTS1.rRailLength, 
+	rGap				:= GVL_XTS1.rGap, 
+	Mover				:= GVL_XTS1.Mover,
+	);
+
+	
+// XTS 1 : Find which mover is waiting at Startposition	
+iMoverAtStartpos_XTS1 := 0;
+FOR i:=1 TO GVL_XTS1.iNumbOfMovers DO
+	fbMoveratStartPos_XTS1[i](
+		rActualPosition	:= GVL_XTS1.Mover[i].NcToPlc.ModuloSetPos, 
+		rCheckPosition	:= GVL_XTS1.rInitPosition, 
+		rRailLength		:= GVL_XTS1.rRailLength
+		);
+	IF fbMoveratStartPos_XTS1[i].bInPosition THEN
+		iMoverAtStartpos_XTS1 := i;
+	END_IF
+	
+END_FOR
+	
+// Start Synchronisation Virtual Master
+bStartSyncMaster:=FALSE;
+iVirtMasterAtStartpos:=0;
+FOR i := 1 TO GVL_Infeed.iNumbOfVirtMasters DO
+	IF (GVL_Infeed.VirtalMaster[i].NcToPlc.SetPos>GVL_Infeed.rSlaveOffset+10) AND (GVL_Infeed.VirtalMaster[i].NcToPlc.SetPos<GVL_Infeed.rSlaveOffset+120) THEN
+		iVirtMasterAtStartpos:=i;
+		bStartSyncMaster:=TRUE;
+	END_IF
+END_FOR
+
+// Start Synchronisation Mover
+Trg_bStartSyncMaster(Clk:=bStartSyncMaster);
+IF (iMoverAtStartpos_XTS1<>0) AND Trg_bStartSyncMaster.Q THEN
+	bStartSyncMover:=TRUE;
+END_IF
+IF iMoverAtStartpos_XTS1=0 OR NOT bStartSyncMaster THEN
+	bStartSyncMover:=FALSE;
+END_IF
+
+// XTS 1 : Cyclic movement for all movers
+FOR i:=1 TO GVL_XTS1.iNumbOfMovers DO
+	fbMoverCycle_XTS1[i](
+		bStartCycle			:= bStartSyncMover AND (iMoverAtStartpos_XTS1=i), 
+		iVirtMasterAtStart	:= iVirtMasterAtStartpos,
+		rMasterSyncPos		:= 300,
+		rSlaveSyncPos		:= (GVL_XTS1.Mover[i].NcToPlc.ModuloActTurns * GVL_XTS1.rRailLength) + GVL_XTS1.rSlaveSyncPos,
+		Mover				:= GVL_XTS1.Mover[i]
+		);
+
+END_FOR
+
+// Cyclus Pers + Robot1 
+
+FOR j := 1 TO 10 DO
+	MoverAtRobot1[j] := 0;
+	FOR i:=1 TO GVL_XTS1.iNumbOfMovers DO
+		fbMoveratRobot1Pos[i](
+			rActualPosition	:= GVL_XTS1.Mover[i].NcToPlc.ModuloSetPos, 
+			rCheckPosition	:= GVL_XTS1.rRobot1_Position - (j*GVL_XTS1.rGap) + GVL_XTS1.rGap , 
+			rRailLength		:= GVL_XTS1.rRailLength
+			);
+		IF fbMoveratRobot1Pos[i].bInPosition THEN
+			MoverAtRobot1[j] := i;
+		END_IF
+	END_FOR
+END_FOR
+
+bRobot1_Filled := TRUE;
+FOR i := 1 TO 10 DO
+	IF MoverAtRobot1[i]=0 THEN
+		bRobot1_Filled := FALSE;
+	END_IF
+END_FOR
+
+fbRobot1_Timer(IN:=bRobot1_Filled , PT:=GVL_XTS1.tTime_Robot1 );
+IF fbRobot1_Timer.Q THEN
+	FOR i:=1 TO 10 DO
+		fbMoverCycle_XTS1[MoverAtRobot1[i]].Robot1_Ready:=TRUE;	
+	END_FOR
+ELSE
+	FOR i:=1 TO GVL_XTS1.iNumbOfMovers DO
+		fbMoverCycle_XTS1[i].Robot1_Ready:=FALSE;	
+	END_FOR	
+END_IF
+
+
+// Cyclus Robot2 
+
+FOR j := 1 TO 10 DO
+	MoverAtRobot2[j] := 0;
+	FOR i:=1 TO GVL_XTS1.iNumbOfMovers DO
+		fbMoveratRobot2Pos[i](
+			rActualPosition	:= GVL_XTS1.Mover[i].NcToPlc.ModuloSetPos, 
+			rCheckPosition	:= GVL_XTS1.rRobot2_Position - (j*GVL_XTS1.rGap) + GVL_XTS1.rGap , 
+			rRailLength		:= GVL_XTS1.rRailLength
+			);
+		IF fbMoveratRobot2Pos[i].bInPosition THEN
+			MoverAtRobot2[j] := i;
+		END_IF
+	END_FOR
+END_FOR
+
+bRobot2_Filled := TRUE;
+FOR i := 1 TO 10 DO
+	IF MoverAtRobot2[i]=0 THEN
+		bRobot2_Filled := FALSE;
+	END_IF
+END_FOR
+
+fbRobot2_Timer(IN:=bRobot2_Filled , PT:=GVL_XTS1.tTime_Robot2 );
+IF fbRobot2_Timer.Q THEN
+	FOR i:=1 TO 10 DO
+		fbMoverCycle_XTS1[MoverAtRobot2[i]].Robot2_Ready:=TRUE;	
+	END_FOR
+ELSE
+	FOR i:=1 TO GVL_XTS1.iNumbOfMovers DO
+		fbMoverCycle_XTS1[i].Robot2_Ready:=FALSE;	
+	END_FOR	
+END_IF
+
+// call
+MyXTS(axisRef := GVL_XTS1.Mover);
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_MoverCycle" Id="{ba937269-8ef3-471c-b8c3-179b2c6d5e0a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MoverCycle 
+VAR_INPUT
+	bStartCycle			: BOOL;
+	iVirtMasterAtStart	: int;
+	rMasterSyncPos		: MC_LREAL;
+	rSlaveSyncPos		: MC_LREAL;
+	Robot1_Ready		: BOOL;
+	Robot2_Ready		: BOOL;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR_IN_OUT
+	Mover				: AXIS_REF;
+END_VAR
+VAR
+	i					: INT;
+	step				: INT;
+	fbGearIn			: MC_GearInPosCA;
+	fbMoveToRobot1		: MC_MoveAbsoluteCA;
+	fbMoveToRobot2		: MC_MoveAbsoluteCA;
+	fbMoveStartPos		: MC_MoveAbsoluteCA;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE step OF
+	
+	0:	// Wait for startcommand
+	
+		fbGearIn.Execute		:= FALSE;	
+		fbMoveStartPos.Execute 	:= FALSE;
+		fbMoveToRobot1.Execute	:= FALSE;	
+		fbMoveToRobot2.Execute	:= FALSE;	
+	
+		IF bStartCycle THEN
+			step:=10;
+		END_IF
+		
+	
+	10:	// Sync with Master
+
+		fbGearIn.Execute				:= TRUE; 
+		fbGearIn.ContinuousUpdate		:= TRUE; 
+		fbGearIn.RatioNumerator			:= 1; 
+		fbGearIn.RatioDenumerator		:= 1; 
+		fbGearIn.MasterSyncPosition		:= rMasterSyncPos; 
+		fbGearIn.SlaveSyncPosition		:= rSlaveSyncPos; 
+		fbGearIn.SyncStrategy			:= mcSyncStrategyEarly; 
+		fbGearIn.Velocity				:= 4000;
+
+		IF Mover.NcToPlc.ModuloActPos > (GVL_XTS1.rSlaveSyncPos+GVL_XTS1.rSyncDistance) THEN
+			step:=20;
+		END_IF
+
+	20:	// Move To Robot1	
+		
+		fbMoveToRobot1.Position			:= (Mover.NcToPlc.ModuloActTurns * GVL_XTS1.rRailLength) + GVL_XTS1.rRobot1_Position;
+		fbMoveToRobot1.Velocity 		:= GVL_XTS1.rXTS_Velocity;
+		fbMoveToRobot1.ContinuousUpdate	:= FALSE;
+		fbMoveToRobot1.Gap				:= GVL_XTS1.rGap;
+		fbMoveToRobot1.BufferMode		:= mcAborting;
+		fbMoveToRobot1.Execute			:= TRUE;
+		
+		IF Robot1_Ready THEN
+			step:=30;
+		END_IF
+		
+	30:	// Move To Robot2	
+		
+		fbMoveToRobot2.Position			:= (Mover.NcToPlc.ModuloActTurns * GVL_XTS1.rRailLength) + GVL_XTS1.rRobot2_Position;
+		fbMoveToRobot2.Velocity 		:= GVL_XTS1.rXTS_Velocity;
+		fbMoveToRobot2.ContinuousUpdate	:= FALSE;
+		fbMoveToRobot2.Gap				:= GVL_XTS1.rGap;
+		fbMoveToRobot2.BufferMode		:= mcAborting;
+		fbMoveToRobot2.Execute			:= TRUE;
+		
+		IF Robot2_Ready THEN
+			step:=40;
+		END_IF
+	
+	40:	// Goto startposition
+
+		fbMoveStartPos.Position			:= (Mover.NcToPlc.ModuloActTurns * GVL_XTS1.rRailLength) + GVL_XTS1.rInitPosition + GVL_XTS1.rRailLength;
+		fbMoveStartPos.Velocity 		:= GVL_XTS1.rXTS_Velocity;
+		fbMoveStartPos.ContinuousUpdate	:= FALSE;
+		fbMoveStartPos.Gap				:= GVL_XTS1.rGap;
+		fbMoveStartPos.BufferMode		:= mcAborting;
+		fbMoveStartPos.Execute			:= TRUE;
+		IF fbMoveStartPos.Done THEN
+			step:=0;
+		END_IF
+		
+
+END_CASE
+
+fbMoveStartPos	( Axis:= Mover);
+fbMoveToRobot1	( Axis:= Mover);
+fbMoveToRobot2	( Axis:= Mover);
+fbGearIn		( Master:= GVL_Infeed.VirtalMaster[iVirtMasterAtStart], Slave:= Mover); 
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_MoverCycle">
+      <LineId Id="3" Count="73" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

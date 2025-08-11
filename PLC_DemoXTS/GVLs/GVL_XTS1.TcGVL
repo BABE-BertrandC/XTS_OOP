@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <GVL Name="GVL_XTS1" Id="{29eb152d-4456-400f-92a3-af1c82f38afe}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	
+	iNumbOfMovers		: INT	:= 35;
+	rRailLength			: LREAL	:= 6000.0;
+
+END_VAR
+
+
+VAR_GLOBAL
+
+	Mover				: ARRAY [1..iNumbOfMovers] OF Axis_Ref;
+	CAGroup				: AXES_GROUP_REF;		
+
+	rInitPosition		: LREAL := 1100;
+	rInitVelocity		: LREAL	:= 720;
+	rGap				: LREAL	:= 90;
+	rMasterVelocity		: LREAL	:= 600;
+	rSlaveSyncPos		: LREAL := 1300;
+	rSyncDistance		: LREAL := 400;
+	rXTS_Velocity		: LREAL := 720;
+	rRobot1_Position	: LREAL := 4000;
+	rRobot2_Position	: LREAL := 5500;
+	tTime_Robot1		: TIME := T#4500MS;
+	tTime_Robot2		: TIME := T#1500MS;
+	
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

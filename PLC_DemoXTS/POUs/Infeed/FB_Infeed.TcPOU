@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Infeed" Id="{10b295ba-01be-45b5-9e7a-224a70369683}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Infeed
+VAR_INPUT
+	bEnable_Master			: BOOL;
+	bMoveMaster				: BOOL;
+	bSensorProduct			: BOOL;
+END_VAR
+
+VAR_IN_OUT
+	Master					: Axis_Ref;
+	VirtMaster				: ARRAY [*] OF Axis_Ref;
+END_VAR
+
+VAR
+	i						: DINT;
+	iStartIndex				: DINT;
+	VeloMaster				: LREAL;
+	bToggle					: BOOL;
+
+	fbPowerMaster			: MC_Power;
+	fbMoveMaster			: MC_MoveVelocity;
+	fbStopMaster			: MC_Halt;
+	fbPowerVirtMaster		: ARRAY [1..iMaxNumbVirtMasters] OF MC_Power;
+	fbVirtMaster			: ARRAY [1..iMaxNumbVirtMasters] OF FB_VirtualMaster;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Enable Master
+Master.ReadStatus();
+fbPowerMaster(
+	Axis			:= Master, 
+	Enable			:= bEnable_Master, 
+	Enable_Positive	:= bEnable_Master, 
+	Enable_Negative	:= bEnable_Master, 
+	Override		:= 100, 
+	);
+	
+FOR i := 1 TO UPPER_BOUND(VirtMaster,1) DO
+	VirtMaster[i].ReadStatus();
+	fbPowerVirtMaster[i](
+		Axis			:= VirtMaster[i], 
+		Enable			:= bEnable_Master, 
+		Enable_Positive	:= bEnable_Master, 
+		Enable_Negative	:= bEnable_Master, 
+		Override		:= 100, 
+		);
+END_FOR
+
+
+// Start-Stop Master
+
+VeloMaster := GVL_Infeed.iProductsPerMinute * 360 / 60;
+bToggle:=NOT bToggle;
+
+fbMoveMaster(
+	Axis		:= Master, 
+	Execute		:= bMoveMaster AND bToggle, 
+	Velocity	:= VeloMaster, 
+	Direction	:= MC_Positive_Direction, 
+	);
+fbStopMaster(
+	Axis		:= Master, 
+	Execute		:= NOT bMoveMaster, 
+	);
+
+// Virtual Master ready to start
+iStartIndex:=0;
+FOR i := 1 TO UPPER_BOUND(VirtMaster,1) DO
+	IF VirtMaster[i].NcToPlc.ActPos=0 THEN
+		iStartIndex:=i;
+		i:=5;
+	END_IF
+END_FOR
+	
+// Detection product
+FOR i := 1 TO UPPER_BOUND(VirtMaster,1) DO
+	fbVirtMaster[i].bActivateCam:=FALSE;
+END_FOR
+
+IF (Master.NcToPlc.ModuloActPos > GVL_Infeed.rDetectionPosMin) AND (Master.NcToPlc.ModuloActPos < GVL_Infeed.rDetectionPosMax) AND bSensorProduct THEN
+	fbVirtMaster[iStartIndex].bActivateCam:=TRUE;
+END_IF
+ 
+FOR i := 1 TO UPPER_BOUND(VirtMaster,1) DO
+	fbVirtMaster[i](
+		Master:= Master, 
+		Slave:= VirtMaster[i],
+		);
+END_FOR
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Infeed">
+      <LineId Id="44" Count="0" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="17" Count="5" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="314" Count="0" />
+      <LineId Id="36" Count="5" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="49" Count="3" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="244" Count="0" />
+      <LineId Id="287" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="233" Count="2" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="222" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <Itf Name="IMover" Id="{b22b677f-b1c6-4b67-9ba3-53fa715cc8df}">
+    <Declaration><![CDATA[INTERFACE IMover
+]]></Declaration>
+    <Method Name="AssignAxisRef" Id="{fb7cddf4-aff1-465e-aad6-1faaa1a94d61}">
+      <Declaration><![CDATA[METHOD AssignAxisRef : bool
+VAR_INPUT
+	axis : REFERENCE TO AXIS_REF;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="AssignID" Id="{b0d94990-61fc-45d7-b7fe-e557aea3fe3e}">
+      <Declaration><![CDATA[METHOD AssignID : bool
+VAR_INPUT
+	ID : UDINT;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="GetPosition" Id="{79c445a0-a7ad-43ba-950c-acfdac18df4a}">
+      <Declaration><![CDATA[METHOD GetPosition : LREAL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="GetStatus" Id="{02b38516-c9fb-489c-9aad-15fbc8ba014d}">
+      <Declaration><![CDATA[METHOD GetStatus : int
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetStatus" Id="{cd1620a5-76fe-4e2a-ad74-7665e3017036}">
+      <Declaration><![CDATA[METHOD SetStatus : BOOL;
+VAR_INPUT
+	status : INT;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="UpdateData" Id="{5085982a-143f-45fc-a17a-aa704adc0518}">
+      <Declaration><![CDATA[METHOD UpdateData : ST_MoverData
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="UpdatePosition" Id="{2a4388f4-d713-40cd-b81c-c5b71db390e8}">
+      <Declaration><![CDATA[METHOD UpdatePosition : bool
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

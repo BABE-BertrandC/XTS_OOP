@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="Prg_Camming" Id="{6c8cd0d9-86fa-49b4-9434-92d176e2293b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Prg_Camming
+VAR
+	bCreateCamTable		: BOOL	:= TRUE;
+	CamTable			: MC_CAM_REF;
+	MotionFunction 		: ARRAY[1..7] OF MC_MotionFunctionPoint;
+	fbCamTable			: MC_CamTableSelect;
+	
+	rMasterDistance		: LREAL;
+	rSlaveDistance		: LREAL;
+	rFactor				: LREAL;
+
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+CamTable.ArraySize		:= SIZEOF(MotionFunction);
+CamTable.NoOfColumns	:= 1;
+CamTable.NoOfRows		:= 7;
+CamTable.pArray			:= ADR(MotionFunction);
+CamTable.TableType		:= MC_TABLETYPE_MOTIONFUNCTION;
+
+rMasterDistance			 	:= GVL_Infeed.rMasterDistance_1Cycle;
+rSlaveDistance				:= GVL_Infeed.rDiameterWheel * pi /8;
+GVL_Infeed.rSlaveOffset		:= GVL_Infeed.rSyncPosition_Wheel_XTS - (rSlaveDistance * 1.5);
+GVL_Infeed.rSlaveOffset_P5 	:= -(GVL_Infeed.rMasterDistance_P5/GVL_Infeed.rMasterDistance_P3)*GVL_Infeed.rSlaveOffset_P3;
+
+
+
+// Punt 1
+MotionFunction[1].PointIndex		:= 1; 
+MotionFunction[1].FunctionType 		:= MOTIONFUNCTYPE_POLYNOM1;
+MotionFunction[1].PointType			:= MOTIONPOINTTYPE_MOTION;
+MotionFunction[1].RelIndexNextPoint	:= 1;
+MotionFunction[1].MasterPos			:= ( 0 * rMasterDistance);
+MotionFunction[1].SlavePos			:= ( 0 * rSlaveDistance ) + GVL_Infeed.rSlaveOffset;
+
+// Punt 2
+rFactor := ((1.5 * GVL_Infeed.rMasterDistance_1Cycle) - GVL_Infeed.rMasterDistance_P2 )/GVL_Infeed.rMasterDistance_1Cycle;
+MotionFunction[2].PointIndex		:= 2; 
+MotionFunction[2].FunctionType 		:= MOTIONFUNCTYPE_POLYNOM5_MM;
+MotionFunction[2].PointType			:= MOTIONPOINTTYPE_MOTION;
+MotionFunction[2].RelIndexNextPoint	:= 1;
+MotionFunction[2].MasterPos			:= ( rFactor * rMasterDistance);
+MotionFunction[2].SlavePos			:= ( rFactor * rSlaveDistance ) + GVL_Infeed.rSlaveOffset_P2 + GVL_Infeed.rSlaveOffset;
+
+// Punt 3
+rFactor := ((1.5 * GVL_Infeed.rMasterDistance_1Cycle) - GVL_Infeed.rMasterDistance_P3 )/GVL_Infeed.rMasterDistance_1Cycle;
+MotionFunction[3].PointIndex		:= 3; 
+MotionFunction[3].FunctionType 		:= MOTIONFUNCTYPE_POLYNOM1;
+MotionFunction[3].PointType			:= MOTIONPOINTTYPE_MOTION;
+MotionFunction[3].RelIndexNextPoint	:= 1;
+MotionFunction[3].MasterPos			:= ( rFactor * rMasterDistance);
+MotionFunction[3].SlavePos			:= ( rFactor * rSlaveDistance ) + GVL_Infeed.rSlaveOffset_P3 + GVL_Infeed.rSlaveOffset;
+
+// Punt 4
+MotionFunction[4].PointIndex		:= 4; 
+MotionFunction[4].FunctionType 		:= MOTIONFUNCTYPE_POLYNOM1;
+MotionFunction[4].PointType			:= MOTIONPOINTTYPE_MOTION;
+MotionFunction[4].RelIndexNextPoint	:= 1;
+MotionFunction[4].MasterPos			:= ( 1.5 * rMasterDistance);
+MotionFunction[4].SlavePos			:= ( 1.5 * rSlaveDistance ) + GVL_Infeed.rSlaveOffset;
+
+// Punt 5
+rFactor := ((1.5 * GVL_Infeed.rMasterDistance_1Cycle) + GVL_Infeed.rMasterDistance_P5 )/GVL_Infeed.rMasterDistance_1Cycle;
+MotionFunction[5].PointIndex		:= 5; 
+MotionFunction[5].FunctionType 		:= MOTIONFUNCTYPE_POLYNOM5_MM;
+MotionFunction[5].PointType			:= MOTIONPOINTTYPE_MOTION;
+MotionFunction[5].RelIndexNextPoint	:= 1;
+MotionFunction[5].MasterPos			:= ( rFactor * rMasterDistance);
+MotionFunction[5].SlavePos			:= ( rFactor * rSlaveDistance ) + GVL_Infeed.rSlaveOffset_P5 + GVL_Infeed.rSlaveOffset;
+
+// Punt 6
+rFactor := ((1.5 * GVL_Infeed.rMasterDistance_1Cycle) + GVL_Infeed.rMasterDistance_P6 )/GVL_Infeed.rMasterDistance_1Cycle;
+MotionFunction[6].PointIndex		:= 6; 
+MotionFunction[6].FunctionType 		:= MOTIONFUNCTYPE_POLYNOM1;
+MotionFunction[6].PointType			:= MOTIONPOINTTYPE_MOTION;
+MotionFunction[6].RelIndexNextPoint	:= 0;
+MotionFunction[6].MasterPos			:= ( rFactor * rMasterDistance);
+MotionFunction[6].SlavePos			:= ( rFactor * rSlaveDistance ) + GVL_Infeed.rSlaveOffset;
+
+// Punt 7
+MotionFunction[7].PointIndex		:= 7; 
+MotionFunction[7].PointType			:= MOTIONPOINTTYPE_MOTION;
+MotionFunction[7].RelIndexNextPoint	:= 0;
+MotionFunction[7].MasterPos			:= ( 3 * rMasterDistance);
+MotionFunction[7].SlavePos			:= ( 3 * rSlaveDistance ) + GVL_Infeed.rSlaveOffset;
+
+// Create Cam Table
+fbCamTable(
+	Master		:= GVL_Infeed.MasterAxis, 
+	Slave		:= GVL_Infeed.VirtalMaster[1], 
+	CamTable	:= CamTable, 
+	Execute		:= bCreateCamTable, 
+	Periodic	:= TRUE, 
+	CamTableID	:= 1, 
+	);
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

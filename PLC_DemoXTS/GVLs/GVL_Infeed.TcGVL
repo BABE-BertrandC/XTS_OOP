@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <GVL Name="GVL_Infeed" Id="{9f84e09f-547b-411b-94dd-2d6443748d47}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	
+	iNumbOfVirtMasters		: INT	:= 4;
+
+END_VAR
+
+
+VAR_GLOBAL
+
+	MasterAxis				: AXIS_REF;
+	VirtalMaster			: ARRAY [1..iNumbOfVirtMasters] OF Axis_Ref;
+
+	iProductsPerMinute		: INT 	:= 60;
+
+	rDiameterWheel			: LREAL := 480;			// Diameter Infeed Wheel
+	rMasterDistance_1Cycle	: LREAL := 360;			// 8 cycles per rotation
+	rSyncPosition_Wheel_XTS	: LREAL := 471.5;		
+	rDetectionPosMin		: LREAL := 160;
+	rDetectionPosMax		: LREAL := 200;
+	
+	//CamTable
+	rMasterDistance_P2		: LREAL	:= 180;
+	rSlaveOffset_P2			: LREAL := 0;
+	rMasterDistance_P3		: LREAL	:= 20;
+	rSlaveOffset_P3			: LREAL	:= 10;
+	rMasterDistance_P5		: LREAL := 30;
+	rSlaveOffset_P5			: LREAL;
+	rMasterDistance_P6		: LREAL := 180;
+	rSlaveOffset_P6			: LREAL := -5;
+	rSlaveOffset			: LREAL;
+	
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

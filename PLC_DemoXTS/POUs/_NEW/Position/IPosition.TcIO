@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <Itf Name="IPosition" Id="{8835e768-8e17-4863-9db8-de274aa62ea4}">
+    <Declaration><![CDATA[INTERFACE IPosition
+]]></Declaration>
+    <Method Name="Available" Id="{c999e04a-121b-4403-af0c-0eb61ad229b2}">
+      <Declaration><![CDATA[METHOD Available : bool
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetMover" Id="{ea9f450e-f171-469c-b5e6-f2623e97557b}">
+      <Declaration><![CDATA[METHOD SetMover : bool
+VAR_INPUT
+	moverNumber : UDINT;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetPosition" Id="{7871864c-9682-4272-9fa9-4439e6da66ca}">
+      <Declaration><![CDATA[METHOD SetPosition
+VAR_INPUT
+	position : LREAL;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

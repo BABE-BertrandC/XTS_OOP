@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <POU Name="XTS_MAIN" Id="{d0457f57-1614-450e-9de6-45383406e1a7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK XTS_MAIN
+VAR_IN_OUT
+	axisRef : ARRAY [1..iMaxNumbMovers] OF AXIS_REF;
+END_VAR
+VAR
+	fbMover	: ARRAY [1..iMaxNumbMovers] OF FB_MoverX;
+	fbPosition	: ARRAY [1..10] OF FB_PositionX;
+	initDone : BOOL;
+	i : DINT;
+	positionActive : DINT;
+	size : DINT;
+	position : INT;
+	list : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
+	trackList : FB_Tracklist;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Init
+IF NOT initDone THEN
+	FOR i:=1 TO iMaxNumbMovers DO
+		fbMover[i].AssignID(ID:= i);
+		fbMover[i].AssignAxisRef(axis:= axisRef[i]);
+	END_FOR
+	FOR i:=1 TO 10 DO
+		position := position + 100;
+		fbPosition[i].SetPosition(position := position);
+	END_FOR
+	initDone := TRUE;
+END_IF
+
+// Cyclic
+FOR i:=1 TO iMaxNumbMovers DO
+	trackList.AddMover(data := fbMover[i].UpdateData());
+END_FOR
+trackList.Sort();
+
+
+
+size := UPPER_BOUND(fbPosition,1);
+positionActive := 0;
+FOR i:=1 TO size DO
+	IF fbPosition[i].Available() AND positionActive = 0 THEN
+		positionActive := i;		
+	END_IF
+END_FOR]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
