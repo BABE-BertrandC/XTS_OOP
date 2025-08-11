@@ -10,6 +10,13 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Method Name="FindMover" Id="{1faee4eb-b871-41a3-a7e7-c273132636db}">
+      <Declaration><![CDATA[METHOD FindMover : UDINT
+VAR_INPUT
+	status : INT;
+END_VAR
+]]></Declaration>
+    </Method>
     <Method Name="Sort" Id="{11abf748-dd65-48d2-bc1f-2500f31ada4d}">
       <Declaration><![CDATA[METHOD Sort : bool
 VAR_INPUT

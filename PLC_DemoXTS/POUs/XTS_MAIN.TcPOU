@@ -15,6 +15,7 @@ VAR
 	position : INT;
 	list : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
 	trackList : FB_Tracklist;
+	foundMover : UDINT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -45,7 +46,12 @@ FOR i:=1 TO size DO
 	IF fbPosition[i].Available() AND positionActive = 0 THEN
 		positionActive := i;		
 	END_IF
-END_FOR]]></ST>
+END_FOR
+IF positionActive <> 0 THEN
+	IF trackList.FindMover(status:=1) <> 0 THEN
+		// Assign Mover
+	END_IF
+END_IF]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

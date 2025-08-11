@@ -9,8 +9,10 @@ END_VAR
 VAR
 	_list : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
 	_sorted : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
-	_temp : ST_MoverData;
+	_tempData : ST_MoverData;
+	_temp	: udINT;
 	i,j : INT;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -29,6 +31,22 @@ END_VAR
         <ST><![CDATA[_list[data.id] := data;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="FindMover" Id="{33981e48-82c3-4db8-b8e8-7ff5814bbbc3}">
+      <Declaration><![CDATA[METHOD FindMover : UDINT
+VAR_INPUT
+	status	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FindMover := 0;
+FOR i:= iMaxNumbMovers TO 1 BY -1 DO
+	IF _sorted[i].status <> 0 AND  _sorted[i].status = status THEN
+		FindMover := _sorted[i].id;
+		EXIT;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Sort" Id="{5182b790-329f-48c5-abac-59d6da2e6290}">
       <Declaration><![CDATA[METHOD Sort : BOOL
 ]]></Declaration>
@@ -40,9 +58,9 @@ _sorted := _list;
 FOR i := 1 TO iMaxNumbMovers - 1 DO
     FOR j := i + 1 TO iMaxNumbMovers DO
         IF _sorted[i].pos > _sorted[j].pos THEN
-            _temp := _sorted[i];
+            _tempData := _sorted[i];
             _sorted[i] := _sorted[j];
-            _sorted[j] := _temp;
+            _sorted[j] := _tempData;
         END_IF
     END_FOR
 END_FOR]]></ST>
