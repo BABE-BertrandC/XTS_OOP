@@ -77,7 +77,9 @@ SetStatus := true;]]></ST>
         <ST><![CDATA[_position := _axisRef.NcToPlc.ModuloActPos;
 UpdateData.id := _id;
 UpdateData.pos := _position;
-UpdateData.status := _status;]]></ST>
+UpdateData.status := _status;
+UpdateData.assigned := _posId <> 0;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="UpdatePosition" Id="{ab62045e-375f-46d3-b7af-e566298d2bb8}">

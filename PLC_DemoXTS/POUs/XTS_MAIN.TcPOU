@@ -19,6 +19,7 @@ VAR
 	id : UDINT;
 	IPosition : IPosition;
 	IMover : IMover;
+	statusRequest : INT := 1;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -54,10 +55,10 @@ FOR i:=1 TO size DO
 	END_IF
 END_FOR
 IF IPosition <> 0 THEN
-	foundMover := trackList.FindMover(status:=1);
+	foundMover := trackList.FindMover(status:= statusRequest);
 	IF foundMover <> 0 THEN
-		trackList.SetMoverInUse
 		IPosition.SetMover(foundMover);
+		trackList.SetMoverInUse(foundMover);		
 		IMover := fbMover[foundMover];
 		IMover.SetPositionID(IPosition.GetID());
 	END_IF
