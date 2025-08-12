@@ -16,6 +16,9 @@ VAR
 	list : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
 	trackList : FB_Tracklist;
 	foundMover : UDINT;
+	id : UDINT;
+	IPosition : IPosition;
+	IMover : IMover;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -42,18 +45,21 @@ trackList.Sort();
 
 
 size := UPPER_BOUND(fbPosition,1);
-positionActive := 0;
+IPosition := 0;
+//IMover := 0;
 FOR i:=1 TO size DO
 	IF fbPosition[i].Available() THEN
-		positionActive := i;
+		IPosition := fbPosition[i];
 		EXIT;		
 	END_IF
 END_FOR
-IF positionActive <> 0 THEN
+IF IPosition <> 0 THEN
 	foundMover := trackList.FindMover(status:=1);
 	IF foundMover <> 0 THEN
-		fbPosition[positionActive].SetMover(foundMover);
-		fbMover[foundMover].
+		trackList.SetMoverInUse
+		IPosition.SetMover(foundMover);
+		IMover := fbMover[foundMover];
+		IMover.SetPositionID(IPosition.GetID());
 	END_IF
 END_IF]]></ST>
     </Implementation>

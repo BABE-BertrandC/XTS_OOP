@@ -11,8 +11,7 @@ VAR
 	_sorted : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
 	_tempData : ST_MoverData;
 	_temp	: udINT;
-	i,j : INT;
-	
+	i,j : INT;	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -40,11 +39,21 @@ END_VAR
       <Implementation>
         <ST><![CDATA[FindMover := 0;
 FOR i:= iMaxNumbMovers TO 1 BY -1 DO
-	IF _sorted[i].status <> 0 AND  _sorted[i].status = status THEN
+	IF _sorted[i].status = status AND NOT _sorted[i].assigned THEN
 		FindMover := _sorted[i].id;
 		EXIT;
 	END_IF
 END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetMoverInUse" Id="{87e123e5-04bd-4e13-99a7-1c2053f14a46}">
+      <Declaration><![CDATA[METHOD SetMoverInUse : BOOL
+VAR_INPUT
+	moverNumber	: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_Sorted[moverNumber].assigned := TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Sort" Id="{5182b790-329f-48c5-abac-59d6da2e6290}">

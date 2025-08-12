@@ -17,6 +17,13 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Method Name="SetMoverInUse" Id="{f099ce91-25b4-4f45-9d02-7efa3fb381ee}">
+      <Declaration><![CDATA[METHOD SetMoverInUse : BOOL;
+VAR_INPUT
+	moverNumber	: UDINT;
+END_VAR
+]]></Declaration>
+    </Method>
     <Method Name="Sort" Id="{11abf748-dd65-48d2-bc1f-2500f31ada4d}">
       <Declaration><![CDATA[METHOD Sort : bool
 VAR_INPUT

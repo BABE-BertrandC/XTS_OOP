@@ -22,7 +22,7 @@ END_VAR
 ]]></Declaration>
     </Method>
     <Method Name="GetID" Id="{742185ae-0856-4c59-813c-a1f0eba464c0}">
-      <Declaration><![CDATA[METHOD GetID : BOOL
+      <Declaration><![CDATA[METHOD GetID : UDINT
 VAR_INPUT
 END_VAR
 ]]></Declaration>

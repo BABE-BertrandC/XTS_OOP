@@ -7,7 +7,8 @@ VAR
 	_axisRef  : REFERENCE TO AXIS_REF;
 	_position : LREAL;
 	_velocity : LREAL;
-	_status	: INT;	
+	_status	: INT;
+	_posId	: UDINT;	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -25,8 +26,7 @@ AssignAxisRef := TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="AssignID" Id="{aefc784f-4d23-4fb9-8518-4b089e31af57}">
-      <Declaration><![CDATA[{warning 'Add method implementation '}
-METHOD AssignID : BOOL
+      <Declaration><![CDATA[METHOD AssignID : BOOL
 VAR_INPUT
 	ID	: UDINT;
 END_VAR
@@ -47,6 +47,16 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[GetStatus := _status;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetPositionID" Id="{6fab7301-0c9c-44e8-9e1d-d609bbb7c89e}">
+      <Declaration><![CDATA[METHOD SetPositionID : BOOL
+VAR_INPUT
+	ID	: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_posId := ID;]]></ST>
       </Implementation>
     </Method>
     <Method Name="SetStatus" Id="{0a7191fb-5e77-4dea-a05d-a0bdca83c510}">

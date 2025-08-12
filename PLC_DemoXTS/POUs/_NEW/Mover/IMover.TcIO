@@ -29,6 +29,13 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Method Name="SetPositionID" Id="{b22d9d77-640c-41e5-911c-b2eaa5caeb76}">
+      <Declaration><![CDATA[METHOD SetPositionID : BOOL
+VAR_INPUT
+	ID: UDINT;
+END_VAR
+]]></Declaration>
+    </Method>
     <Method Name="SetStatus" Id="{cd1620a5-76fe-4e2a-ad74-7665e3017036}">
       <Declaration><![CDATA[METHOD SetStatus : BOOL;
 VAR_INPUT
