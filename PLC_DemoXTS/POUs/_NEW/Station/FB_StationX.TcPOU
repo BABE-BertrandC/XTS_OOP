@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <POU Name="FB_StationX" Id="{9ecec1f6-3d19-4c02-8b90-9106cbec514d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_StationX IMPLEMENTS IStation
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	_positions : ARRAY [1..10] OF IPosition;
+	_track: ITrackList;
+	_activePos: IPosition;
+	_stateAttract : INT := 1;
+	_nextPosition : IPosition;
+	_foundMover : UDINT;
+	_lastFound : UDINT;
+	_size: DINT;
+	_i: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FindMoverMatch" Id="{f4052df5-77cc-46dc-9b77-2cf1ad4ae4a3}">
+      <Declaration><![CDATA[METHOD FindMoverMatch : UDINT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Find Eligible Mover
+IF _activePos <> 0 THEN
+	_foundMover := _track.FindMover(status:= _stateAttract);
+	IF _foundMover <> 0  AND _foundMover <> _lastFound THEN
+		_lastFound := _foundMover;
+		_activePos.SetMover(_foundMover);
+		_track.SetMoverInUse(_foundMover);		
+		//IMover := fbMover[foundMover];
+		//IMover.SetPositionID(IPosition.GetID());
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FindNextPosition" Id="{18f4daf9-b6b7-4373-bfb0-a7f9fef2d811}">
+      <Declaration><![CDATA[METHOD FindNextPosition : IPosition
+
+VAR
+	success : BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Check sizes
+_size := UPPER_BOUND(_positions,1);
+
+// Find First Unassigned Position
+_nextPosition := 0;
+FOR _i:=1 TO _size DO
+	success := _positions[_i].Available();
+	IF success THEN
+		_nextPosition := _positions[_i];
+		EXIT;		
+	END_IF
+END_FOR
+
+FindNextPosition := _nextPosition;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetMovers" Id="{5c5989b8-8f95-4284-8b30-bdcbb9e26340}">
+      <Declaration><![CDATA[METHOD GetMovers : BOOL]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.FindNextPosition();
+THIS^.FindMoverMatch();
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetPosRef" Id="{4a7a49d9-5ccc-4c90-8495-60c21f59ea09}">
+      <Declaration><![CDATA[METHOD SetPosRef : BOOL
+VAR_INPUT
+	PosIndex	: DINT;
+	PosRef	: REFERENCE TO FB_PositionX;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_positions[PosIndex] := PosRef;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetStationAttraction" Id="{ac127971-87a2-4903-a91a-ac1c38bf2183}">
+      <Declaration><![CDATA[METHOD SetStationAttraction : BOOL
+VAR_INPUT
+	setState	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_stateAttract := setState;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetTrackRef" Id="{463f93c8-c5f5-4131-b42a-bf5979b3d608}">
+      <Declaration><![CDATA[METHOD SetTrackRef : BOOL
+VAR_INPUT
+	TrackRef	: ITrackList;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_track := TrackRef;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

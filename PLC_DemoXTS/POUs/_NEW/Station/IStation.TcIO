@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
+  <Itf Name="IStation" Id="{ad2a9605-1431-4e38-b464-9e75dcc5c264}">
+    <Declaration><![CDATA[INTERFACE IStation
+]]></Declaration>
+    <Method Name="FindMoverMatch" Id="{3d014b2b-d53b-460d-a169-a1d3bd4aeeed}">
+      <Declaration><![CDATA[METHOD FindMoverMatch : udint
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="FindNextPosition" Id="{416cc32a-58cf-4c57-bedd-4ac90c640b8e}">
+      <Declaration><![CDATA[METHOD FindNextPosition : IPosition;
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="GetMovers" Id="{5dcd5f5f-d1a7-4570-849e-96d9cadb4164}">
+      <Declaration><![CDATA[METHOD GetMovers : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetPosRef" Id="{afdd7a2b-b162-4d22-a4b7-f5bf1a15001e}">
+      <Declaration><![CDATA[METHOD SetPosRef : BOOL
+VAR_INPUT
+	PosIndex : DINT;
+	PosRef	: REFERENCE TO FB_PositionX;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetStationAttraction" Id="{52188779-1db2-452f-ac2a-630123340e7a}">
+      <Declaration><![CDATA[METHOD SetStationAttraction : BOOL
+VAR_INPUT
+	setState : INT;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetTrackRef" Id="{14a6e016-9a08-4024-88a3-d8555f33dd0f}">
+      <Declaration><![CDATA[METHOD SetTrackRef : BOOL
+VAR_INPUT
+	TrackRef : ITrackList;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

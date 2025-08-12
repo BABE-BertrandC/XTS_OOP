@@ -3,13 +3,6 @@
   <Itf Name="ITrackList" Id="{26cab804-596d-4864-8cd8-7d64b3c06639}">
     <Declaration><![CDATA[INTERFACE ITrackList
 ]]></Declaration>
-    <Method Name="AddMover" Id="{2b01b911-4a74-4eee-a901-630b73283a40}">
-      <Declaration><![CDATA[METHOD AddMover : bool
-VAR_INPUT
-	data	: ST_MoverData;
-END_VAR
-]]></Declaration>
-    </Method>
     <Method Name="FindMover" Id="{1faee4eb-b871-41a3-a7e7-c273132636db}">
       <Declaration><![CDATA[METHOD FindMover : UDINT
 VAR_INPUT
@@ -24,9 +17,24 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Method Name="SetMoverRef" Id="{f7d088c4-70d8-4371-b1e0-e360740f5625}">
+      <Declaration><![CDATA[METHOD SetMoverRef : BOOL
+VAR_INPUT
+	index : DINT;
+	mover	: IMover;
+END_VAR
+]]></Declaration>
+    </Method>
     <Method Name="Sort" Id="{11abf748-dd65-48d2-bc1f-2500f31ada4d}">
       <Declaration><![CDATA[METHOD Sort : bool
 VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="UpdateMoverData" Id="{2b01b911-4a74-4eee-a901-630b73283a40}">
+      <Declaration><![CDATA[METHOD UpdateMoverData : bool
+VAR_INPUT
+	data	: ST_MoverData;
 END_VAR
 ]]></Declaration>
     </Method>

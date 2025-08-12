@@ -74,6 +74,12 @@
     <Compile Include="POUs\_NEW\Position\IPosition.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\_NEW\Station\FB_StationX.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\_NEW\Station\IStation.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\_NEW\TrackList\FB_Tracklist.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -89,6 +95,7 @@
     <Folder Include="POUs\XTS" />
     <Folder Include="POUs" />
     <Folder Include="POUs\_NEW\Mover" />
+    <Folder Include="POUs\_NEW\Station" />
     <Folder Include="POUs\_NEW\TrackList" />
     <Folder Include="POUs\_NEW\Position" />
   </ItemGroup>

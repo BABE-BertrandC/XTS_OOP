@@ -78,7 +78,6 @@ SetStatus := true;]]></ST>
 UpdateData.id := _id;
 UpdateData.pos := _position;
 UpdateData.status := _status;
-UpdateData.assigned := _posId <> 0;
 ]]></ST>
       </Implementation>
     </Method>

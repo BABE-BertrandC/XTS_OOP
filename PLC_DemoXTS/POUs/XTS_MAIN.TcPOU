@@ -20,15 +20,37 @@ VAR
 	IPosition : IPosition;
 	IMover : IMover;
 	statusRequest : INT := 1;
+	station : FB_StationX;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Init
 IF NOT initDone THEN
+	// Reference Axis to Mover Object
 	FOR i:=1 TO iMaxNumbMovers DO
 		fbMover[i].AssignID(ID:= i);
 		fbMover[i].AssignAxisRef(axis:= axisRef[i]);
 	END_FOR
+	
+	// Reference Movers to Track
+	FOR i:=1 TO iMaxNumbMovers DO
+		tracklist.SetMoverRef(
+					index:= i, 
+					mover:= fbMover[i]);
+	END_FOR
+	
+	// Reference Positions to Stations
+	FOR i:=1 TO 10 DO
+	station.SetPosRef(
+				PosIndex:= i, 
+				PosRef:= fbPosition[i]);
+	END_FOR
+	
+	// Reference Track to the Station
+	station.SetTrackRef(trackList);
+	
+	// User Position Configuration
 	FOR i:=1 TO 10 DO
 		position := position + 100;
 		fbPosition[i].SetPosition(position := position);
@@ -37,32 +59,16 @@ IF NOT initDone THEN
 	initDone := TRUE;
 END_IF
 
+
 // Cyclic
 FOR i:=1 TO iMaxNumbMovers DO
-	trackList.AddMover(data := fbMover[i].UpdateData());
+	trackList.UpdateMoverData(data := fbMover[i].UpdateData());
 END_FOR
 trackList.Sort();
 
 
-
-size := UPPER_BOUND(fbPosition,1);
-IPosition := 0;
-//IMover := 0;
-FOR i:=1 TO size DO
-	IF fbPosition[i].Available() THEN
-		IPosition := fbPosition[i];
-		EXIT;		
-	END_IF
-END_FOR
-IF IPosition <> 0 THEN
-	foundMover := trackList.FindMover(status:= statusRequest);
-	IF foundMover <> 0 THEN
-		IPosition.SetMover(foundMover);
-		trackList.SetMoverInUse(foundMover);		
-		IMover := fbMover[foundMover];
-		IMover.SetPositionID(IPosition.GetID());
-	END_IF
-END_IF]]></ST>
+station.GetMovers();
+]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>

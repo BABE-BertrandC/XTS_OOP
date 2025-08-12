@@ -9,27 +9,16 @@ END_VAR
 VAR
 	_list : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
 	_sorted : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
+	_sortedBU : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
 	_tempData : ST_MoverData;
-	_temp	: udINT;
+	_temp	: UDINT;
+	_mover : ARRAY [1..10] OF IMover;
 	i,j : INT;	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="AddMover" Id="{19bcc54b-d09d-4767-9281-dabe045635c5}">
-      <Declaration><![CDATA[METHOD AddMover : BOOL
-VAR_INPUT
-	data	: ST_MoverData;
-END_VAR
-VAR
-	temp	: INT;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[_list[data.id] := data;]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="FindMover" Id="{33981e48-82c3-4db8-b8e8-7ff5814bbbc3}">
       <Declaration><![CDATA[METHOD FindMover : UDINT
 VAR_INPUT
@@ -40,6 +29,7 @@ END_VAR
         <ST><![CDATA[FindMover := 0;
 FOR i:= iMaxNumbMovers TO 1 BY -1 DO
 	IF _sorted[i].status = status AND NOT _sorted[i].assigned THEN
+		_sorted[i].assigned := TRUE;
 		FindMover := _sorted[i].id;
 		EXIT;
 	END_IF
@@ -56,12 +46,32 @@ END_VAR
         <ST><![CDATA[_Sorted[moverNumber].assigned := TRUE;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="SetMoverRef" Id="{bb3fa255-fee5-4b06-8ffa-9aff8162ff41}">
+      <Declaration><![CDATA[METHOD SetMoverRef : BOOL
+VAR_INPUT
+	index	: DINT;
+	mover	: IMover;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_mover[index]:= mover;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Sort" Id="{5182b790-329f-48c5-abac-59d6da2e6290}">
       <Declaration><![CDATA[METHOD Sort : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Step 1: Copy the list
+        <ST><![CDATA[//backup Cycle Data
+_sortedBU := _sorted;
+
+// Step 1: Copy the list
 _sorted := _list;
+
+// Step 2: Restore Data
+FOR i := 1 TO iMaxNumbMovers DO
+	_sorted[i].assigned := _sortedBU[i].assigned;
+END_FOR
+
 
 // Step 2: Bubble Sort the list
 FOR i := 1 TO iMaxNumbMovers - 1 DO
@@ -73,6 +83,19 @@ FOR i := 1 TO iMaxNumbMovers - 1 DO
         END_IF
     END_FOR
 END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UpdateMoverData" Id="{19bcc54b-d09d-4767-9281-dabe045635c5}">
+      <Declaration><![CDATA[METHOD UpdateMoverData : BOOL
+VAR_INPUT
+	data	: ST_MoverData;
+END_VAR
+VAR
+	temp	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_list[data.id] := data;]]></ST>
       </Implementation>
     </Method>
   </POU>
