@@ -9,6 +9,7 @@ END_VAR
 VAR
 	_position	: LREAL;
 	_linked		: UDINT;
+	_disabled	: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -18,9 +19,52 @@ END_VAR
       <Declaration><![CDATA[METHOD Available : BOOL
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF _linked = 0 THEN
+        <ST><![CDATA[IF _linked = 0 AND NOT _disabled THEN
 	Available := TRUE;
 END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Disable" Id="{3e216bfe-d53e-4f2f-ad7d-a1b65a4599dc}">
+      <Declaration><![CDATA[METHOD Disable : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_disabled := TRUE;
+Disable := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Enable" Id="{af1ea2f2-7176-4f78-80fa-63ccf4f4f668}">
+      <Declaration><![CDATA[METHOD Enable : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_disabled := FALSE;
+Enable := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetID" Id="{c2e7a569-b11d-4b09-bad0-27a4ed050732}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD GetID : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetPosition" Id="{be05e450-14ba-44db-990a-3f71e286962e}">
+      <Declaration><![CDATA[METHOD GetPosition : LREAL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GetPosition := _position;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetID" Id="{f25d49ee-fe10-4110-80ac-9b993ad69204}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD SetID : BOOL
+VAR_INPUT
+	ID	: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
       </Implementation>
     </Method>
     <Method Name="SetMover" Id="{83289a63-eb24-4eac-83c4-eebaa2247582}">

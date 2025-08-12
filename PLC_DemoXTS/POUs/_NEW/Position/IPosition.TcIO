@@ -9,6 +9,37 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Method Name="Disable" Id="{8810c1b5-50ce-4650-8b38-043e6689a135}">
+      <Declaration><![CDATA[METHOD Disable : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Enable" Id="{19c14a27-563e-46ec-be21-d908d34fb245}">
+      <Declaration><![CDATA[METHOD Enable : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="GetID" Id="{742185ae-0856-4c59-813c-a1f0eba464c0}">
+      <Declaration><![CDATA[METHOD GetID : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="GetPosition" Id="{ec3a357f-6f2c-4318-addf-157d6e3daa91}">
+      <Declaration><![CDATA[METHOD GetPosition : LREAL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetID" Id="{d119766e-5c1f-4fe8-b9f4-9863cc53f248}">
+      <Declaration><![CDATA[METHOD SetID : BOOL
+VAR_INPUT
+	ID : UDINT;
+END_VAR
+]]></Declaration>
+    </Method>
     <Method Name="SetMover" Id="{ea9f450e-f171-469c-b5e6-f2623e97557b}">
       <Declaration><![CDATA[METHOD SetMover : bool
 VAR_INPUT

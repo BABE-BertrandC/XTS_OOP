@@ -6,6 +6,7 @@ STRUCT
 	id : UDINT;
 	pos : LREAL;
 	status : INT;
+	assigned : BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
