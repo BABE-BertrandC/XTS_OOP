@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
-  <Itf Name="ITrackList" Id="{26cab804-596d-4864-8cd8-7d64b3c06639}">
-    <Declaration><![CDATA[INTERFACE ITrackList
+  <Itf Name="ITrack" Id="{26cab804-596d-4864-8cd8-7d64b3c06639}">
+    <Declaration><![CDATA[INTERFACE ITrack
 ]]></Declaration>
     <Method Name="FindMover" Id="{1faee4eb-b871-41a3-a7e7-c273132636db}">
       <Declaration><![CDATA[METHOD FindMover : UDINT

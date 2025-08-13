@@ -80,10 +80,10 @@
     <Compile Include="POUs\_NEW\Station\IStation.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\_NEW\TrackList\FB_Tracklist.TcPOU">
+    <Compile Include="POUs\_NEW\TrackList\FB_Track.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\_NEW\TrackList\ITrackList.TcIO">
+    <Compile Include="POUs\_NEW\TrackList\ITrack.TcIO">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

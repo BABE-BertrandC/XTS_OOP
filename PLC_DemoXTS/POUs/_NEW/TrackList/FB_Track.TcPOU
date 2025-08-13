@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.12">
-  <POU Name="FB_Tracklist" Id="{546a42d1-a9e5-46d3-b826-00988018d01d}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Tracklist IMPLEMENTS ITrackList
+  <POU Name="FB_Track" Id="{546a42d1-a9e5-46d3-b826-00988018d01d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Track IMPLEMENTS ITrack
 VAR_INPUT
 END_VAR
 VAR_OUTPUT

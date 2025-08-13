@@ -8,7 +8,7 @@ VAR_OUTPUT
 END_VAR
 VAR
 	_positions : ARRAY [1..10] OF IPosition;
-	_track: ITrackList;
+	_track: ITrack;
 	_activePos: IPosition;
 	_stateAttract : INT := 1;
 	_nextPosition : IPosition;
@@ -96,7 +96,7 @@ END_VAR
     <Method Name="SetTrackRef" Id="{463f93c8-c5f5-4131-b42a-bf5979b3d608}">
       <Declaration><![CDATA[METHOD SetTrackRef : BOOL
 VAR_INPUT
-	TrackRef	: ITrackList;
+	TrackRef	: ITrack;
 END_VAR
 ]]></Declaration>
       <Implementation>

@@ -14,7 +14,7 @@ VAR
 	size : DINT;
 	position : INT;
 	list : ARRAY [1..iMaxNumbMovers] OF ST_MoverData;
-	trackList : FB_Tracklist;
+	trackList : FB_Track;
 	foundMover : UDINT;
 	id : UDINT;
 	IPosition : IPosition;

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedType>
+      <Type guid="26cab804-596d-4864-8cd8-7d64b3c06639">ITRACKLIST</Type>
+      <From>ITrackList</From>
+      <To>ITrack</To>
+    </RenamedType>
+    <RenamedType>
+      <Type guid="546a42d1-a9e5-46d3-b826-00988018d01d">FB_TRACKLIST</Type>
+      <From>FB_Tracklist</From>
+      <To>FB_Track</To>
+    </RenamedType>
+  </Renames>
+</Refactors>

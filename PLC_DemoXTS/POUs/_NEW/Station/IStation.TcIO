@@ -39,7 +39,7 @@ END_VAR
     <Method Name="SetTrackRef" Id="{14a6e016-9a08-4024-88a3-d8555f33dd0f}">
       <Declaration><![CDATA[METHOD SetTrackRef : BOOL
 VAR_INPUT
-	TrackRef : ITrackList;
+	TrackRef : ITrack;
 END_VAR
 ]]></Declaration>
     </Method>
